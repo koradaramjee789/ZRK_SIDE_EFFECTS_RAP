@@ -1,0 +1,5 @@
+@EndUserText.label: 'Service definition forZRK_SDE_C_TRAVEL'
+define service ZRK_SDE_UI_TRAVEL {
+  expose ZRK_SDE_C_TRAVEL as Travel;
+  expose ZRK_SDE_C_BOOKING as Bookings;
+}

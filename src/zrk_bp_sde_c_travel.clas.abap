@@ -1,0 +1,5 @@
+CLASS zrk_bp_sde_c_travel DEFINITION PUBLIC ABSTRACT FINAL FOR BEHAVIOR OF zrk_sde_c_travel.
+ENDCLASS.
+
+CLASS zrk_bp_sde_c_travel IMPLEMENTATION.
+ENDCLASS.
