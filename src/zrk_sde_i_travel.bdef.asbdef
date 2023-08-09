@@ -10,6 +10,18 @@ lock master total etag LastChangedAt
 authorization master ( global )
 
 {
+
+  create;
+  update;
+  delete;
+  association _Booking { create; with draft; }
+
+  draft action Edit;
+  draft action Activate;
+  draft action Discard;
+  draft action Resume;
+  draft determine action Prepare;
+
   field ( readonly )
   TravelUUID,
   TravelID,
@@ -21,16 +33,14 @@ authorization master ( global )
   LocalLastChangedAt,
   LocalLastChangedBy;
 
+
+
   field ( numbering : managed )
   TravelUUID;
 
-  create;
-  update;
-  delete;
-  association _Booking { create; with draft; }
   determination Set_Travel_no on save { create; }
 
-  validation Valid_Dates on save { create; update; field BeginDate; }
+  validation Valid_Dates on save { create; update; field BeginDate, EndDate; }
   determination Calculate_Total_price on modify { field BookingFee; }
   determine action Det_act_valid_dates { validation Valid_Dates; }
 
@@ -38,16 +48,10 @@ authorization master ( global )
 
   side effects
   {
-    determine action Det_act_valid_dates executed on field BeginDate affects messages;
+    determine action Det_act_valid_dates executed on field BeginDate,field EndDate affects messages;
 
     field BookingFee affects field TotalPrice;
   }
-
-  draft action Edit;
-  draft action Activate;
-  draft action Discard;
-  draft action Resume;
-  draft determine action Prepare;
   mapping for zrk_sde_a_travel
     {
       TravelUUID         = travel_uuid;
@@ -67,6 +71,8 @@ authorization master ( global )
       LocalLastChangedBy = local_last_changed_by;
       LastChangedAt      = last_changed_at;
     }
+
+
 
 }
 
@@ -96,7 +102,7 @@ etag master localLastChangedAt
   {
 
     field FlightPrice affects field _Travel.TotalPrice;
-    action Apply_Discount affects field _Travel.TotalPrice ;
+    action Apply_Discount affects field _Travel.TotalPrice;
   }
   mapping for zrk_sde_a_book
     {

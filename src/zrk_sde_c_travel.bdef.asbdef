@@ -20,6 +20,8 @@ use etag
   use action Resume;
   use action Prepare;
 
+  use action Det_act_valid_dates;
+
 }
 
 define behavior for zrk_sde_c_booking alias Booking

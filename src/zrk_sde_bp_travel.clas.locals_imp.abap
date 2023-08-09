@@ -33,15 +33,15 @@ CLASS lhc_booking IMPLEMENTATION.
          RESULT DATA(lt_travels).
     IF lt_travels IS INITIAL.
 
-        DATA(lv_booking_uuid) = VALUE #( keys[ 1 ]-BookingUuid OPTIONAL ).
-        SELECT SINGLE TravelUUID
-            FROM zrk_sde_d_book
-            WHERE BookingUuid = @lv_booking_uuid
-            INTO @DATA(lv_travel_uuid).
-            IF sy-subrc EQ 0.
-                APPEND VALUE #( %tky-%is_draft = if_abap_behv=>mk-on
-                                traveluuid = lv_travel_uuid ) TO lt_travels.
-            ENDIF.
+      DATA(lv_booking_uuid) = VALUE #( keys[ 1 ]-BookingUuid OPTIONAL ).
+      SELECT SINGLE TravelUUID
+          FROM zrk_sde_d_book
+          WHERE BookingUuid = @lv_booking_uuid
+          INTO @DATA(lv_travel_uuid).
+      IF sy-subrc EQ 0.
+        APPEND VALUE #( %tky-%is_draft = if_abap_behv=>mk-on
+                        traveluuid = lv_travel_uuid ) TO lt_travels.
+      ENDIF.
 
     ENDIF.
 
@@ -174,8 +174,20 @@ CLASS lhc_travel IMPLEMENTATION.
                                                                 severity = if_abap_behv_message=>severity-error )
                         %element-EndDate   = if_abap_behv=>mk-on ) TO reported-travel.
       ENDIF.
+
+      IF travel-BeginDate < cl_abap_context_info=>get_system_date( ) AND travel-BeginDate IS NOT INITIAL.
+        APPEND VALUE #( %tky               = travel-%tky ) TO failed-travel.
+
+        APPEND VALUE #( %tky               = travel-%tky
+                        %state_area        = 'VALIDATE_DATES'
+                         %msg              = NEW /dmo/cm_flight_messages(
+                                                                begin_date = travel-BeginDate
+                                                                textid     = /dmo/cm_flight_messages=>begin_date_on_or_bef_sysdate
+                                                                severity   = if_abap_behv_message=>severity-error )
+                        %element-BeginDate = if_abap_behv=>mk-on ) TO reported-travel.
+      ENDIF.
       IF travel-EndDate < travel-BeginDate AND travel-BeginDate IS NOT INITIAL
-                                           AND travel-EndDate IS NOT INITIAL.
+                                     AND travel-EndDate IS NOT INITIAL.
         APPEND VALUE #( %tky = travel-%tky ) TO failed-travel.
 
         APPEND VALUE #( %tky               = travel-%tky
@@ -187,17 +199,6 @@ CLASS lhc_travel IMPLEMENTATION.
                                                                 severity   = if_abap_behv_message=>severity-error )
                         %element-BeginDate = if_abap_behv=>mk-on
                         %element-EndDate   = if_abap_behv=>mk-on ) TO reported-travel.
-      ENDIF.
-      IF travel-BeginDate < cl_abap_context_info=>get_system_date( ) AND travel-BeginDate IS NOT INITIAL.
-        APPEND VALUE #( %tky               = travel-%tky ) TO failed-travel.
-
-        APPEND VALUE #( %tky               = travel-%tky
-                        %state_area        = 'VALIDATE_DATES'
-                         %msg              = NEW /dmo/cm_flight_messages(
-                                                                begin_date = travel-BeginDate
-                                                                textid     = /dmo/cm_flight_messages=>begin_date_on_or_bef_sysdate
-                                                                severity   = if_abap_behv_message=>severity-error )
-                        %element-BeginDate = if_abap_behv=>mk-on ) TO reported-travel.
       ENDIF.
     ENDLOOP.
 
